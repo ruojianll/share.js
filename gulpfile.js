@@ -17,14 +17,14 @@ var paths = {
     dest: basePaths.dest + 'fonts/'
   }
 };
-
+console.log(paths)
 var appFiles = {
   styles: [paths.styles.src + '**/*.scss'],
   jqueryShare: [paths.scripts.src + 'jquery.qrcode.min.js', paths.scripts.src + 'jquery.share.js'],
   socialShare: [paths.scripts.src + 'qrcode.js', paths.scripts.src + 'social-share.js'],
   fonts: [paths.fonts.src + '**/*']
 };
-
+console.log(appFiles)
 var vendorFiles = {
   styles: [],
   scripts: [],
@@ -52,26 +52,27 @@ var isProduction = true;
 var sassStyle = 'compressed';
 var sourceMap = false;
 
-if(gutil.env.dev === true) {
+if (gutil.env.dev === true) {
   sassStyle = 'expanded';
   sourceMap = true;
   isProduction = false;
 }
 
-var changeEvent = function(evt) {
+var changeEvent = function (evt) {
   gutil.log('File', gutil.colors.cyan(evt.path.replace(new RegExp('/.*(?=/' + basePaths.src + ')/'), '')), 'was', gutil.colors.magenta(evt.type));
 };
 
-var clean = function(path, cb) {
+var clean = function (path, cb) {
   // You can use multiple globbing patterns as you would with `gulp.src`
-  del([path], {force:true}, cb);
+  del([path], { force: true }, cb);
 };
 
-gulp.task('css', function(cb){
+gulp.task('css', function (cb) {
   // app css
+  console.log('scccc')
   plugins.sass(vendorFiles.styles.concat(appFiles.styles), {
-      outputStyle: sassStyle, sourcemap: sourceMap, precision: 2
-    })
+    outputStyle: sassStyle, sourcemap: sourceMap, precision: 2
+  })
     // .pipe(plugins.concat('style.min.css'))
     .pipe(plugins.autoprefixer({
       browsers: ['last 2 versions'],
@@ -79,13 +80,16 @@ gulp.task('css', function(cb){
     }))
     // .pipe(isProduction ? plugins.cssmin() : gutil.noop())
     .pipe(plugins.size())
-    .on('error', function(err){
-      new gutil.PluginError('CSS', err, {showStack: true});
+    .on('error', function (err) {
+      new gutil.PluginError('CSS', err, { showStack: true });
     })
     .pipe(plugins.notify())
-    .pipe(plugins.rename({suffix: '.min'}))
+    .pipe(plugins.rename({ suffix: '.min' }))
+    // .pipe(function(){
+    //   console.log(arguments)
+    // })
     .pipe(gulp.dest(paths.styles.dest));
-    cb()
+  cb()
 });
 
 gulp.task('jquery.share.js', function () {
@@ -94,7 +98,7 @@ gulp.task('jquery.share.js', function () {
     .pipe(isProduction ? plugins.uglify() : gutil.noop())
     .pipe(plugins.size())
     .pipe(plugins.notify())
-    .pipe(plugins.rename({suffix: '.min'}))
+    .pipe(plugins.rename({ suffix: '.min' }))
     .pipe(gulp.dest(paths.scripts.dest));
 });
 
@@ -104,11 +108,11 @@ gulp.task('share.js', function () {
     .pipe(isProduction ? plugins.uglify() : gutil.noop())
     .pipe(plugins.size())
     .pipe(plugins.notify())
-    .pipe(plugins.rename({suffix: '.min'}))
+    .pipe(plugins.rename({ suffix: '.min' }))
     .pipe(gulp.dest(paths.scripts.dest));
 });
 
-gulp.task('fonts', function(){
+gulp.task('fonts', function () {
   return gulp.src(appFiles.fonts)
     .pipe(gulp.dest(paths.fonts.dest));
 });
@@ -124,4 +128,4 @@ gulp.task('watch', gulp.parallel('css', 'jquery.share.js', 'share.js', 'fonts'),
   });
 });
 
-gulp.task('default', gulp.parallel( 'css', 'jquery.share.js', 'share.js', 'fonts' ));
+gulp.task('default', gulp.parallel('css', 'jquery.share.js', 'share.js', 'fonts'));

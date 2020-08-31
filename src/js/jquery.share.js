@@ -16,7 +16,8 @@
  * });
  * </pre>
  */
-;(function($){
+; (function ($) {
+    var singleCount = 0;
     /**
      * Initialize a share bar.
      *
@@ -43,7 +44,7 @@
             wechatQrcodeSize: 100,
 
             mobileSites: [],
-            sites: ['weibo','qq','wechat','tencent','douban','qzone','linkedin','diandian','facebook','twitter','google'],
+            sites: ['weibo', 'qq', 'wechat', 'tencent', 'douban', 'qzone', 'linkedin', 'diandian', 'facebook', 'twitter', 'google'],
             disabled: [],
             initialized: false
         };
@@ -51,17 +52,17 @@
         var $globals = $.extend({}, $defaults, $options);
 
         var $templates = {
-            qzone       : 'http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url={{URL}}&title={{TITLE}}&desc={{DESCRIPTION}}&summary={{SUMMARY}}&site={{SOURCE}}&pics={{IMAGE}}',
-            qq          : 'http://connect.qq.com/widget/shareqq/index.html?url={{URL}}&title={{TITLE}}&source={{SOURCE}}&desc={{DESCRIPTION}}&pics={{IMAGE}}',
-            tencent     : 'http://share.v.t.qq.com/index.php?c=share&a=index&title={{TITLE}}&url={{URL}}&pic={{IMAGE}}',
-            weibo       : 'https://service.weibo.com/share/share.php?url={{URL}}&title={{TITLE}}&pic={{IMAGE}}&appkey={{WEIBOKEY}}',
-            wechat      : 'javascript:;',
-            douban      : 'http://shuo.douban.com/!service/share?href={{URL}}&name={{TITLE}}&text={{DESCRIPTION}}&image={{IMAGE}}&starid=0&aid=0&style=11',
-            diandian    : 'http://www.diandian.com/share?lo={{URL}}&ti={{TITLE}}&type=link',
-            linkedin    : 'http://www.linkedin.com/shareArticle?mini=true&ro=true&title={{TITLE}}&url={{URL}}&summary={{SUMMARY}}&source={{SOURCE}}&armin=armin',
-            facebook    : 'https://www.facebook.com/sharer/sharer.php?u={{URL}}&title={{TITLE}}&description={{DESCRIPTION}}&caption={{SUBHEAD}}&link={{URL}}&picture={{IMAGE}}',
-            twitter     : 'https://twitter.com/intent/tweet?text={{TITLE}}&url={{URL}}&via={{SITE_URL}}',
-            google      : 'https://plus.google.com/share?url={{URL}}'
+            qzone: 'http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url={{URL}}&title={{TITLE}}&desc={{DESCRIPTION}}&summary={{SUMMARY}}&site={{SOURCE}}&pics={{IMAGE}}',
+            qq: 'http://connect.qq.com/widget/shareqq/index.html?url={{URL}}&title={{TITLE}}&source={{SOURCE}}&desc={{DESCRIPTION}}&pics={{IMAGE}}',
+            tencent: 'http://share.v.t.qq.com/index.php?c=share&a=index&title={{TITLE}}&url={{URL}}&pic={{IMAGE}}',
+            weibo: 'https://service.weibo.com/share/share.php?url={{URL}}&title={{TITLE}}&pic={{IMAGE}}&appkey={{WEIBOKEY}}',
+            wechat: 'javascript:;',
+            douban: 'http://shuo.douban.com/!service/share?href={{URL}}&name={{TITLE}}&text={{DESCRIPTION}}&image={{IMAGE}}&starid=0&aid=0&style=11',
+            diandian: 'http://www.diandian.com/share?lo={{URL}}&ti={{TITLE}}&type=link',
+            linkedin: 'http://www.linkedin.com/shareArticle?mini=true&ro=true&title={{TITLE}}&url={{URL}}&summary={{SUMMARY}}&source={{SOURCE}}&armin=armin',
+            facebook: 'https://www.facebook.com/sharer/sharer.php?u={{URL}}&title={{TITLE}}&description={{DESCRIPTION}}&caption={{SUBHEAD}}&link={{URL}}&picture={{IMAGE}}',
+            twitter: 'https://twitter.com/intent/tweet?text={{TITLE}}&url={{URL}}&via={{SITE_URL}}',
+            google: 'https://plus.google.com/share?url={{URL}}'
         };
 
         var $ariaLabels = {
@@ -78,14 +79,14 @@
             google: "Google"
         };
 
-        this.each(function() {
+        this.each(function () {
             if ($(this).data('initialized')) {
                 return true;
             }
 
-            var $data      = $.extend({}, $globals, $(this).data());
+            var $data = $.extend({}, $globals, $(this).data());
             if ($data.imageSelector) {
-                $data.image = $($data.imageSelector).map(function() {
+                $data.image = $($data.imageSelector).map(function () {
                     return $(this).prop('src');
                 }).get().join('||');
             }
@@ -103,21 +104,21 @@
          * @param {Object|String} $container
          * @param {Object}        $data
          */
-        function createIcons ($container, $data) {
+        function createIcons($container, $data) {
             var $sites = getSites($data);
 
             $data.mode == 'prepend' ? $sites.reverse() : $sites
 
-            if (!$sites.length) {return;}
+            if (!$sites.length) { return; }
 
             $.each($sites, function (i, $name) {
-                var $url  = makeUrl($name, $data);
-                var $link = $data.initialized ? $container.find('.icon-'+$name) : $('<a class="social-share-icon icon-'+$name+'"></a>');
+                var $url = makeUrl($name, $data);
+                var $link = $data.initialized ? $container.find('.icon-' + $name) : $('<a class="social-share-icon icon-' + $name + '"></a>');
 
                 if (!$link.length) {
                     return true;
                 }
-                $link.prop('aria-label', "分享到 "+$ariaLabels[$name]);
+                $link.prop('aria-label', "分享到 " + $ariaLabels[$name]);
 
                 $link.prop('href', $url);
 
@@ -132,25 +133,74 @@
                 }
             });
         }
-
+        function getClientWidth() {
+            var clientHeight = 0;
+            if (document.body.clientWidth && document.documentElement.clientWidth) {
+                var clientHeight = (document.body.clientWidth < document.documentElement.clientWidth) ? document.body.clientWidth : document.documentElement.clientWidth;
+            }
+            else {
+                var clientHeight = (document.body.clientWidth > document.documentElement.clientWidth) ? document.body.clientWidth : document.documentElement.clientWidth;
+            }
+            return clientHeight;
+        }
         /**
          * Create the wechat icon and QRCode.
          *
          * @param {Object|String} $container
          * @param {Object}        $data
          */
-        function createWechat ($container, $data) {
+        function createWechat($container, $data) {
             var $wechat = $container.find('a.icon-wechat');
 
-            if (!$wechat.length) {return;}
+            if (!$wechat.length) { return; }
 
-            $wechat.append('<div class="wechat-qrcode"><h4>'+$data.wechatQrcodeTitle+'</h4><div class="qrcode"></div><div class="help">'+$data.wechatQrcodeHelper+'</div></div>');
+            $wechat.append('<div class=" off-comp-share-wechat-qrcode wechat-qrcode"><h4>' + $data.wechatQrcodeTitle + '</h4><div class="qrcode"></div><div class="help">' + $data.wechatQrcodeHelper + '</div></div>');
 
-            $wechat.find('.qrcode').qrcode({render: 'image', size: $data.wechatQrcodeSize, text: $data.url});
+            $wechat.find('.qrcode').qrcode({ render: 'image', size: $data.wechatQrcodeSize, text: $data.url });
 
-            if ($wechat.offset().top < 100) {
-                $wechat.find('.wechat-qrcode').addClass('bottom');
-            }
+            $wechat.mouseenter(function () {
+                var rect = this.getBoundingClientRect();
+                if (!this.getAttribute('qrcode-el')) {
+                    var code = this.querySelector('.wechat-qrcode');
+                    var id = 'off-comp-share-wechat-qrcode-' + singleCount;
+                    code.id = id;
+                    this.setAttribute('qrcode-el', id);
+                    document.body.appendChild(code);
+                }
+                var id = this.getAttribute('qrcode-el');
+                var code = document.querySelector('#' + id);
+                code.classList.remove('bottom')
+                var clientWidth = getClientWidth();
+                if (rect.y < 210) {
+                    code.classList.add('bottom');
+                    code.style.top = rect.y + 52 + 'px';
+                } else {
+                    code.style.top = rect.y - 210 + 'px';
+                }
+                if (rect.x + 17 - 100 < 0) {
+                    code.style.left = '10px'
+                }
+                else if (rect.x + 17 + 100 > clientWidth) {
+                    code.style.left = clientWidth - 210 + 'px'
+                }
+                else {
+                    code.style.left = rect.x + 17 - 100 + 'px';
+                }
+
+                code.classList.add('show')
+
+            })
+            $wechat.mouseleave(function () {
+                var id = this.getAttribute('qrcode-el');
+                if (id) {
+                    var code = document.querySelector('#' + id);
+                    code.classList.remove('bottom')
+                    code.classList.remove('show')
+                }
+            })
+            // if ($wechat.offset().top < 100) {
+            //     $wechat.find('.wechat-qrcode').addClass('bottom');
+            // }
         }
 
         /**
@@ -160,12 +210,12 @@
          *
          * @return {Array}
          */
-        function getSites ($data) {
+        function getSites($data) {
             if ($data['mobileSites'].length === 0 && $data['sites'].length) {
                 $data['mobileSites'] = $data['sites'];
             };
 
-            var $sites = (isMobileScreen() ? $data['mobileSites'] : ($data['sites'].length ? $data['sites']: [])).slice(0);
+            var $sites = (isMobileScreen() ? $data['mobileSites'] : ($data['sites'].length ? $data['sites'] : [])).slice(0);
             var $disabled = $data['disabled'];
 
             if (typeof $sites == 'string') { $sites = $sites.split(/\s*,\s*/); }
@@ -193,18 +243,18 @@
          *
          * @return {String}
          */
-        function makeUrl ($name, $data) {
+        function makeUrl($name, $data) {
             var $template = $templates[$name];
             $data['summary'] = $data['description'];
 
             for (var $key in $data) {
                 if ($data.hasOwnProperty($key)) {
-                    var $camelCaseKey = $name + $key.replace(/^[a-z]/, function($str){
+                    var $camelCaseKey = $name + $key.replace(/^[a-z]/, function ($str) {
                         return $str.toUpperCase();
                     });
 
                     var $value = encodeURIComponent($data[$camelCaseKey] === undefined ? $data[$key] : $data[$camelCaseKey]);
-                    $template = $template.replace(new RegExp('{{'+$key.toUpperCase()+'}}', 'g'), $value);
+                    $template = $template.replace(new RegExp('{{' + $key.toUpperCase() + '}}', 'g'), $value);
                 }
             }
 
@@ -225,7 +275,7 @@
          *
          * @return {boolean}
          */
-        function isMobileScreen () {
+        function isMobileScreen() {
             return $(window).width() <= 768;
         }
     };

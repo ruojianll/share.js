@@ -1,0 +1,43 @@
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <script src="https://cdn.wqdian.net/jquery/jquery-3.3.1.min.js"></script>
+
+    <script src="./js/jquery.share.min.js"></script>
+    <link rel="stylesheet" href="./css/share.min.css">
+    <style>
+        body{
+            height:2000px;
+            width:2000px;
+        }
+        .social-share {
+            position: absolute;
+            top: 400px;
+            left:800px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="social-share"></div>
+    <script>
+        let disabledSites = ['google', 'facebook', 'twitter','diandian',];
+        let enabledSites = ['qzone', 'qq', 'weibo', 'wechat', 'douban',  'linkedin'];
+        let params = {
+            url: undefined,
+            title: undefined,
+            image: undefined,
+            description: undefined,
+            wechatQrcodeTitle: "微信扫一扫：分享", // 微信二维码提示文字
+            wechatQrcodeHelper: '<p>微信里点“发现”，扫一下</p><p>二维码便可将本文分享至朋友圈。</p>',
+            sites: enabledSites,
+            disabled: disabledSites
+        }
+
+        $('.social-share').share(params);
+    </script>
+</body>
+
+</html>
