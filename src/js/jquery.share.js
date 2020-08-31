@@ -281,7 +281,7 @@
     };
 
     // Domready after initialization
-    $(function () {
-        $('.share-component,.social-share').share();
-    });
+    // $(function () {
+    //     $('.share-component,.social-share').share();
+    // });
 })(jQuery);
